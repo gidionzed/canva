@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lihat Konten Spesial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #4e54c8;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #555;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #4e54c8, #8f94fb);
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .image-preview {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Konten Eksklusif Menunggu Anda!</h1>
+            
+            <div class="image-preview">
+                <img src="https://via.placeholder.com/400x220/4e54c8/FFFFFF?text=Preview+Konten" alt="Preview Konten">
+            </div>
+            
+            <p>Terima kasih telah mengklik link kami. Kami telah menyiapkan konten spesial yang akan memberi Anda inspirasi dan ide-ide baru.</p>
+            
+            <a href="#" class="btn" id="view-content-btn">Lihat Konten Sekarang</a>
+            
+            <div class="footer">
+                <p>© 2025 Nama Brand Anda. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk mendapatkan parameter dari URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Ambil parameter dari URL
+        const waNumber = getUrlParameter('wa');
+        const linkId = getUrlParameter('id');
+        const targetUrl = getUrlParameter('url');
+        
+        // Data pelacakan
+        const trackData = {
+            timestamp: new Date().toISOString(),
+            wa_number: waNumber || 'unknown',
+            link_id: linkId || 'unknown',
+            page_url: window.location.href,
+            user_agent: navigator.userAgent,
+            referrer: document.referrer || 'direct',
+            ip_address: 'will_be_captured_by_server'
+        };
+        
+        // Kirim data pelacakan ke server
+        async function sendTrackingData(data, eventType) {
+            try {
+                data.event_type = eventType; // 'page_view' atau 'click_through'
+                
+                const response = await fetch('tracker_endpoint.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error sending tracking data:', error);
+            }
+        }
+        
+        // Pelacakan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kirim data pelacakan saat halaman dimuat
+            sendTrackingData(trackData, 'page_view');
+            
+            // Atur tombol untuk mengarahkan ke URL tujuan
+            const viewButton = document.getElementById('view-content-btn');
+            if (viewButton) {
+                viewButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Kirim data pelacakan saat tombol diklik
+                    sendTrackingData(trackData, 'click_through')
+                        .then(() => {
+                            // Arahkan ke URL tujuan (Canva)
+                            window.location.href = targetUrl || 'https://www.canva.com/default-design';
+                        });
+                });
+                
+                // Jika ada URL target di parameter, tetapkan ke tombol
+                if (targetUrl) {
+                    viewButton.setAttribute('data-target', targetUrl);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
