@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Izinkan cross-origin requests dari domain Anda
-header("Access-Control-Allow-Origin: https://domain-anda.com");
+header("Access-Control-Allow-Origin: incomparable-unicorn-78fd86.netlify.app");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
