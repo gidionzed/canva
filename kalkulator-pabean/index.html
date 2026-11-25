@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kalkulator Pabean Perbatasan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: alat kerja harian staf PPJK, padat dan rapi
+   IDEA lembar nota perhitungan pungutan resmi: kertas putih, garis tegas, cap merah
+   PICTURE nota hidup di kanan: total pungutan besar, batang komposisi nilai barang/BM/PPN/PPh, rincian per pos, checklist dokumen
+   COLOUR putih, hitam, merah sinyal #e4002b, satu abu; malam #0e0e0e
+   TYPE Archivo lebar 800 untuk judul + Archivo; Plex Mono untuk angka di nota
+   LAYOUT laptop: input kiri, nota kanan menempel; HP: judul, nota, input, bar total bawah */
+:root{color-scheme:light dark;--bg:light-dark(#ececea,#0e0e0e);--ink:light-dark(#0b0b0b,#f1f1ef);--paper:light-dark(#fff,#181818);--line:light-dark(#d2d2cf,#3a3a38);--muted:light-dark(#5e5e5a,#a8a8a3);--red:light-dark(#e4002b,#ff5a6e);--chip:light-dark(#f3f3f1,#242423);--grey:light-dark(#9a9a95,#6d6d69);--bm:light-dark(#e4002b,#ff5a6e);--ppn:light-dark(#0b0b0b,#f1f1ef);--pph:light-dark(#9a9a95,#8a8a85)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,sans-serif;overflow-x:clip;padding-bottom:80px}
+.top{background:var(--ink);color:var(--paper)}
+.top .in,.wrap{max-width:1240px;margin:0 auto;padding-left:max(5vw,16px,env(safe-area-inset-left,0px));padding-right:max(5vw,16px,env(safe-area-inset-right,0px))}
+.top .in{padding-block:28px 24px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:end;justify-content:space-between;border-bottom:8px solid var(--red)}
+h1{font:800 clamp(32px,5.5vw,50px)/1.05 Archivo,sans-serif;font-stretch:112%;letter-spacing:-.02em;margin:0}
+.sub{margin:8px 0 0;max-width:60ch;font-size:16px;opacity:.85}
+.top button{border-color:var(--paper);background:transparent;color:var(--paper)}
+.top button:hover{background:var(--paper);color:var(--ink)}
+.wrap{padding-block:28px}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+.panel{background:var(--paper);border-top:4px solid var(--ink);padding:18px;margin-bottom:18px}
+.panel h2{font:700 20px/1.2 Archivo,sans-serif;margin:0 0 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.panel h2 small{font-weight:400;font-size:14px;color:var(--muted)}
+label{font-size:14px;font-weight:600;display:block;margin-bottom:4px}
+input,select{font:16px Archivo,sans-serif;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:4px;padding:9px 10px;width:100%}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--red);outline-offset:1px}
+button{font:600 15px Archivo,sans-serif;cursor:pointer;border-radius:4px;border:2px solid var(--ink);background:var(--paper);color:var(--ink);padding:9px 16px;min-height:44px}
+button:hover{background:var(--chip)}
+button.main{background:var(--ink);color:var(--paper)}
+button.main:hover{background:var(--red);border-color:var(--red)}
+.x{border:none;background:none;min-height:40px;min-width:40px;padding:0;font-size:22px;color:var(--muted)}
+.x:hover{color:var(--red);background:var(--chip)}
+.f2{display:grid;grid-template-columns:repeat(auto-fit,minmax(11em,1fr));gap:12px}
+.chk{display:flex;gap:10px;align-items:center;font-weight:600;font-size:15px;margin:0;cursor:pointer;min-height:44px}
+.chk input{width:20px;height:20px;flex:none;accent-color:var(--red)}
+.item{border-top:1.5px solid var(--line);padding:14px 0}
+.item:first-child{border-top:none;padding-top:0}
+.ir{display:grid;grid-template-columns:minmax(0,1fr) 8.5em 40px;gap:8px;align-items:end}
+.ir2{display:grid;grid-template-columns:5.5em 7.5em 7.5em 5.5em;gap:8px;margin-top:8px;align-items:end}
+.ir2 label,.ir label{font-weight:400;color:var(--muted);font-size:13px}
+.n{text-align:right}
+.flags{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:6px}
+.flags .chk{font-weight:400;font-size:14px;min-height:36px}
+.hint{font-size:14px;color:var(--muted);margin:10px 0 0}
+.side{position:sticky;top:16px}
+.doc{background:var(--paper);padding:24px 22px;border:1.5px solid var(--ink);position:relative}
+.dh{display:flex;justify-content:space-between;gap:12px;align-items:start;border-bottom:3px solid var(--ink);padding-bottom:12px}
+.dh h3{font:800 19px/1.15 Archivo,sans-serif;font-stretch:112%;margin:0}
+.dh .meta{font-size:13px;color:var(--muted);margin-top:4px}
+.stamp{border:2.5px solid var(--red);color:var(--red);font:800 12px/1.15 Archivo,sans-serif;font-stretch:112%;padding:6px 8px;transform:rotate(-6deg);text-align:center;flex:none;white-space:nowrap}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.tot{margin:16px 0 4px;font-size:14px;color:var(--muted)}
+.big{font:600 clamp(30px,5vw,42px)/1.05 "IBM Plex Mono",monospace;letter-spacing:-.02em;white-space:nowrap}
+.stk{display:flex;height:28px;margin:14px 0 6px;background:var(--chip)}
+.stk i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}
+.leg span{display:flex;align-items:center;gap:6px}
+.leg b{width:12px;height:12px;display:inline-block}
+.rows{margin-top:14px;border-top:1.5px solid var(--ink)}
+.ln{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px}
+.ln span:last-child{white-space:nowrap;font-family:"IBM Plex Mono",monospace;font-size:14px}
+.ln.s{font-weight:700;border-bottom:1.5px solid var(--ink)}
+.ln.r span:last-child{color:var(--red);font-weight:600}
+.sec{font:700 14px Archivo,sans-serif;margin:18px 0 4px;display:flex;justify-content:space-between}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:right;padding:5px 4px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-weight:600;color:var(--muted)}
+td{font-family:"IBM Plex Mono",monospace}
+td:first-child{font-family:Archivo,sans-serif}
+.docs{list-style:none;margin:0;padding:0}
+.docs li{border-bottom:1px solid var(--line)}
+.docs .chk{font-weight:400;font-size:14px;min-height:38px}
+.docs .why{color:var(--muted);font-size:13px;margin-left:auto;text-align:right}
+.prog{height:6px;background:var(--chip);margin-top:4px}
+.prog i{display:block;height:100%;background:var(--red)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.toast{font-size:14px;min-height:21px;margin:8px 0 0;color:var(--red);text-align:center}
+.note{font-size:13px;color:var(--muted);margin:14px 0 0}
+.mbar{display:none}
+@media(max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static;order:-1}
+.mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--ink);color:var(--paper);justify-content:space-between;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+.mbar b{font-size:17px;white-space:nowrap}.mbar a{color:var(--paper);font-weight:600}}
+@media(max-width:600px){.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:none;padding:2px 0;text-align:right}.stack td::before{content:attr(data-l);font-family:Archivo,sans-serif;color:var(--muted)}.stack td:first-child::before{content:none}}
+@media(max-width:520px){.ir{grid-template-columns:minmax(0,1fr) 40px}.ir>div:first-child{grid-column:1/-1}.ir2{grid-template-columns:1fr 1fr}.doc{padding:18px 14px}.acts{grid-template-columns:1fr}.dh{flex-direction:column}.docs .why{display:none}}
+@media(prefers-reduced-motion:no-preference){.stk i,.prog i{transition:width .35s ease}}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="in">
+  <div>
+    <h1>Kalkulator Pabean Perbatasan</h1>
+    <p class="sub">Hitung bea masuk, PPN, dan PPh impor untuk barang yang melintas batas negara, lalu pantau kelengkapan dokumennya dalam satu lembar.</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button id="btnContoh" type="button">Muat contoh</button>
+    <button id="btnBaru" type="button">Pengiriman baru</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+<div class="grid">
+  <section>
+    <div class="panel">
+      <h2>Data pengiriman</h2>
+      <div class="f2">
+        <div><label for="klien">Importir / klien</label><input id="klien" maxlength="60"></div>
+        <div><label for="aju">No. aju / referensi</label><input id="aju" maxlength="40"></div>
+        <div><label for="pos">Pos lintas batas</label><input id="pos" maxlength="50" list="posList"><datalist id="posList"><option>PLBN Entikong (Kalbar) – Malaysia</option><option>PLBN Aruk (Kalbar) – Malaysia</option><option>PLBN Motaain (NTT) – Timor-Leste</option><option>PLBN Skouw (Papua) – Papua Nugini</option><option>Pelabuhan Batam – Singapura</option></datalist></div>
+        <div><label for="asal">Negara asal barang</label><input id="asal" maxlength="40"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Nilai &amp; kurs</h2>
+      <div class="f2">
+        <div><label for="val">Mata uang invoice</label><select id="val"><option>USD</option><option>MYR</option><option>SGD</option><option>CNY</option><option>EUR</option></select></div>
+        <div><label for="kurs">Kurs NDPBM (Rp per 1)</label><input id="kurs" class="n" type="number" inputmode="decimal" min="0"></div>
+        <div><label for="frt">Ongkos angkut / freight</label><input id="frt" class="n" type="number" inputmode="decimal" min="0"></div>
+        <div><label for="ins">Asuransi</label><input id="ins" class="n" type="number" inputmode="decimal" min="0"></div>
+      </div>
+      <p class="hint">Freight dan asuransi dalam mata uang invoice, dibagi ke tiap barang sesuai porsi nilai FOB. Kurs NDPBM berlaku mingguan, cek di situs Bea Cukai.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Daftar barang <small id="nBrg"></small></h2>
+      <div id="items"></div>
+      <button id="btnItem" type="button" style="margin-top:12px">+ Tambah barang</button>
+    </div>
+
+    <div class="panel">
+      <h2>Pajak &amp; jasa</h2>
+      <div class="f2">
+        <div><label for="ppn">PPN impor (%)</label><input id="ppn" class="n" type="number" inputmode="decimal" min="0" step="0.5"></div>
+        <div><label for="api">Status API importir</label><select id="api"><option value="2.5">Punya API (PPh 2,5%)</option><option value="7.5">Tanpa API (PPh 7,5%)</option><option value="10">Barang tertentu (PPh 10%)</option><option value="0">Bebas PPh / SKB</option></select></div>
+        <div><label for="fee">Jasa PPJK (Rp)</label><input id="fee" class="n" type="number" inputmode="numeric" min="0"></div>
+        <div><label for="lain">Biaya lain: gudang, handling (Rp)</label><input id="lain" class="n" type="number" inputmode="numeric" min="0"></div>
+      </div>
+      <label class="chk" style="margin-top:10px"><input type="checkbox" id="formd"> Punya SKA Form D (ATIGA) dari negara ASEAN</label>
+      <p class="hint">Dengan Form D, barang yang ditandai "dapat tarif ATIGA" dikenai bea masuk 0%.</p>
+    </div>
+  </section>
+
+  <aside class="side" id="nota">
+    <div class="doc" aria-live="polite">
+      <div class="dh">
+        <div>
+          <h3>Nota Perhitungan Pungutan Impor</h3>
+          <div class="meta" id="dMeta"></div>
+        </div>
+        <div class="stamp" id="stamp"></div>
+      </div>
+      <div class="tot">Total pungutan negara (BM + PPN + PPh)</div>
+      <div class="big" id="dTotal"></div>
+      <div class="stk" id="stk" role="img"></div>
+      <div class="leg"><span><b style="background:var(--grey);opacity:.35"></b>Nilai pabean</span><span><b style="background:var(--bm)"></b>Bea masuk</span><span><b style="background:var(--ppn)"></b>PPN</span><span><b style="background:var(--pph)"></b>PPh 22</span></div>
+      <div class="rows" id="dRows"></div>
+      <div class="sec">Rincian per barang</div>
+      <div class="scroll"><table class="stack"><thead><tr><th>Barang</th><th>Nilai pabean</th><th>BM</th><th>PPN + PPh</th></tr></thead><tbody id="dTbl"></tbody></table></div>
+      <div class="sec"><span>Kelengkapan dokumen</span><span id="dProg" class="mono"></span></div>
+      <div class="prog"><i id="progBar"></i></div>
+      <ul class="docs" id="docs"></ul>
+      <div class="acts">
+        <button class="main" id="btnSalin" type="button">Salin ringkasan</button>
+        <button id="btnCetak" type="button">Ringkasan teks</button>
+      </div>
+      <p class="toast" id="toast"></p>
+      <pre id="txt" hidden style="white-space:pre-wrap;font:13px/1.5 'IBM Plex Mono',monospace;background:var(--chip);padding:12px;margin:0"></pre>
+      <p class="note">Perkiraan untuk persiapan dokumen. Angka final mengikuti BTKI terbaru dan hasil penetapan di sistem CEISA.</p>
+    </div>
+  </aside>
+</div>
+<p class="note" style="margin-top:0">Data contoh: PT Sinar Batas Niaga (fiktif), kurs dan tarif hanya ilustrasi. Data tersimpan hanya di browser ini.</p>
+</div>
+
+<div class="mbar"><span>Pungutan <b id="mTotal"></b></span><a href="#nota">Lihat nota ↑</a></div>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rp=n=>'Rp'+Math.round(n).toLocaleString('id-ID');
+const up1000=n=>Math.ceil(Math.round(n)/1000)*1000;
+const num=(n,d=2)=>(+n||0).toLocaleString('id-ID',{maximumFractionDigits:d});
+let uid=Date.now()%100000;const nid=()=>'b'+(uid++);
+const KEY='pabean-perbatasan';
+const DOCS=[
+  ['inv','Commercial invoice','selalu'],
+  ['pl','Packing list','selalu'],
+  ['angkut','Dokumen angkut (CMR / manifes BC 1.1)','selalu'],
+  ['pib','PIB (BC 2.0) via CEISA','selalu'],
+  ['nib','NIB & API importir','selalu'],
+  ['kuasa','Surat kuasa ke PPJK','selalu'],
+  ['skaD','SKA Form D (ATIGA)','formd'],
+  ['lartas','Izin lartas (mis. SNI, BPOM, PI)','lartas']
+];
+function contoh(){return{klien:'PT Sinar Batas Niaga',aju:'000020-SBN-20261125-000184',pos:'PLBN Entikong (Kalbar) – Malaysia',asal:'Malaysia',val:'USD',kurs:16250,frt:420,ins:35,ppn:11,api:'2.5',fee:3500000,lain:850000,formd:true,
+  items:[
+    {id:'b1',n:'Ban sepeda motor 90/80-17',hs:'4011.40.00',q:400,h:14.5,bm:10,atiga:true,lt:true},
+    {id:'b2',n:'Suku cadang mesin (piston kit)',hs:'8409.91.70',q:250,h:9.8,bm:5,atiga:true,lt:false},
+    {id:'b3',n:'Biskuit kemasan karton',hs:'1905.31.10',q:180,h:22,bm:15,atiga:false,lt:true},
+    {id:'b4',n:'Peralatan dapur stainless',hs:'7323.93.90',q:120,h:11.25,bm:20,atiga:true,lt:false}],
+  docs:{inv:true,pl:true,angkut:true,nib:true,kuasa:true,skaD:true}}}
+function kosong(){return{klien:'',aju:'',pos:'',asal:'',val:'USD',kurs:0,frt:0,ins:0,ppn:11,api:'2.5',fee:0,lain:0,formd:false,items:[{id:nid(),n:'',hs:'',q:1,h:0,bm:0,atiga:false,lt:false}],docs:{}}}
+let S;
+try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+if(!S||!Array.isArray(S.items))S=contoh();
+S.docs=S.docs||{};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+function hitung(){
+  const fobs=S.items.map(i=>(+i.q||0)*(+i.h||0));
+  const fob=fobs.reduce((a,b)=>a+b,0);
+  const kurs=+S.kurs||0,ppn=(+S.ppn||0)/100,pph=(+S.api||0)/100;
+  const add=(+S.frt||0)+(+S.ins||0);
+  const rows=S.items.map((it,k)=>{
+    const f=fobs[k],cif=f+(fob?add*f/fob:0),np=cif*kurs;
+    const tarif=S.formd&&it.atiga?0:(+it.bm||0)/100;
+    const bm=np*tarif,ni=np+bm;
+    return{it,fob:f,cif,np,bm,ppn:ni*ppn,pph:ni*pph,tarif}});
+  const sum=k=>rows.reduce((a,r)=>a+r[k],0);
+  const np=sum('np'),bm=up1000(sum('bm')),vp=up1000(sum('ppn')),vh=up1000(sum('pph'));
+  const bmTanpa=up1000(rows.reduce((a,r)=>a+r.np*(+r.it.bm||0)/100,0));
+  return{rows,fob,cif:fob+add,np,bm,ppn:vp,pph:vh,pung:bm+vp+vh,hemat:bmTanpa-bm,fee:+S.fee||0,lain:+S.lain||0}
+}
+
+function renderInputs(){
+  ['klien','aju','pos','asal','kurs','frt','ins','ppn','fee','lain'].forEach(k=>$(k).value=S[k]===0?'':(S[k]??''));
+  $('val').value=S.val;$('api').value=S.api;$('formd').checked=!!S.formd;
+  $('nBrg').textContent=S.items.length+' pos tarif';
+  $('items').innerHTML=S.items.map(it=>`<div class="item" data-i="${it.id}">
+    <div class="ir">
+      <div><label>Uraian barang</label><input data-f="n" value="${esc(it.n)}" placeholder="mis. Ban sepeda motor"></div>
+      <div><label>Kode HS</label><input data-f="hs" value="${esc(it.hs)}" placeholder="0000.00.00" inputmode="decimal"></div>
+      <button class="x" data-del type="button" aria-label="Hapus barang">×</button>
+    </div>
+    <div class="ir2">
+      <div><label>Jumlah</label><input class="n" data-f="q" type="number" min="0" inputmode="numeric" value="${it.q||''}"></div>
+      <div><label>Harga satuan (${esc(S.val)})</label><input class="n" data-f="h" type="number" min="0" step="0.01" inputmode="decimal" value="${it.h||''}"></div>
+      <div><label>Nilai FOB</label><input class="n" data-fob readonly tabindex="-1" style="background:var(--chip)" value="${num((+it.q||0)*(+it.h||0))}"></div>
+      <div><label>Tarif BM %</label><input class="n" data-f="bm" type="number" min="0" step="0.5" inputmode="decimal" value="${it.bm===0?'0':(it.bm||'')}"></div>
+    </div>
+    <div class="flags">
+      <label class="chk"><input type="checkbox" data-c="atiga" ${it.atiga?'checked':''}> Dapat tarif ATIGA (0%)</label>
+      <label class="chk"><input type="checkbox" data-c="lt" ${it.lt?'checked':''}> Barang lartas, perlu izin</label>
+    </div></div>`).join('');
+}
+
+let lastText='';
+function renderNota(){
+  const R=hitung();
+  $('dMeta').textContent=[S.klien||'Klien belum diisi',S.aju?'Aju '+S.aju:'',S.pos].filter(Boolean).join(' · ');
+  $('dTotal').textContent=rp(R.pung);$('mTotal').textContent=rp(R.pung);
+  // dokumen
+  const lartas=S.items.some(i=>i.lt);
+  const need=DOCS.filter(d=>d[2]==='selalu'||(d[2]==='formd'&&S.formd)||(d[2]==='lartas'&&lartas));
+  const done=need.filter(d=>S.docs[d[0]]).length;
+  const siap=done===need.length&&R.np>0;
+  $('stamp').textContent=siap?'SIAP AJUKAN':'DRAF';
+  $('stamp').style.opacity=siap?1:.6;
+  // batang komposisi
+  const all=R.np+R.bm+R.ppn+R.pph||1;
+  const seg=[[R.np,'var(--grey);opacity:.35','Nilai pabean'],[R.bm,'var(--bm)','Bea masuk'],[R.ppn,'var(--ppn)','PPN'],[R.pph,'var(--pph)','PPh 22']];
+  $('stk').innerHTML=seg.map(s=>`<i style="width:${(s[0]/all*100).toFixed(2)}%;background:${s[1]}" title="${s[2]}"></i>`).join('');
+  $('stk').setAttribute('aria-label',`Nilai pabean ${rp(R.np)}, bea masuk ${rp(R.bm)}, PPN ${rp(R.ppn)}, PPh ${rp(R.pph)}`);
+  const L=[
+    ['',`Nilai FOB (${S.val})`,num(R.fob)],
+    ['',`Nilai CIF (${S.val}) + freight & asuransi`,num(R.cif)],
+    ['',`Kurs NDPBM`,rp(S.kurs||0)],
+    ['s','Nilai pabean',rp(R.np)],
+    ['r','Bea masuk',rp(R.bm)],
+    ['r',`PPN impor ${num(S.ppn)}%`,rp(R.ppn)],
+    ['r',`PPh 22 impor ${num(S.api,1)}%`,rp(R.pph)],
+    ['s','Total pungutan negara',rp(R.pung)],
+    ['',`Jasa PPJK`,rp(R.fee)],
+    ['',`Biaya lain`,rp(R.lain)],
+    ['s','Total tagihan ke klien',rp(R.pung+R.fee+R.lain)]];
+  if(S.formd&&R.hemat>0)L.splice(5,0,['','Hemat bea masuk berkat Form D','−'+rp(R.hemat)]);
+  $('dRows').innerHTML=L.map(([c,a,b])=>`<div class="ln ${c}"><span>${esc(a)}</span><span>${esc(b)}</span></div>`).join('');
+  $('dTbl').innerHTML=R.rows.filter(r=>r.fob>0).map(r=>`<tr><td style="display:block;text-align:left">${esc(r.it.n||'Barang')}<br><span style="color:var(--muted);font-size:12px">HS ${esc(r.it.hs||'–')} · BM ${num(r.tarif*100,1)}%${r.it.lt?' · lartas':''}</span></td><td data-l="Nilai pabean">${rp(r.np)}</td><td data-l="Bea masuk">${rp(r.bm)}</td><td data-l="PPN + PPh">${rp(r.ppn+r.pph)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted)">Isi jumlah dan harga barang.</td></tr>';
+  $('dProg').textContent=done+'/'+need.length;
+  $('progBar').style.width=(need.length?done/need.length*100:0)+'%';
+  $('docs').innerHTML=need.map(d=>`<li><label class="chk"><input type="checkbox" data-doc="${d[0]}" ${S.docs[d[0]]?'checked':''}> ${esc(d[1])}<span class="why">${d[2]==='formd'?'karena pakai Form D':d[2]==='lartas'?'ada barang lartas':''}</span></label></li>`).join('');
+  const kurang=need.filter(d=>!S.docs[d[0]]).map(d=>d[1]);
+  lastText=[`NOTA PERHITUNGAN PUNGUTAN IMPOR`,`Klien: ${S.klien||'-'}`,`No. aju: ${S.aju||'-'}`,`Pos: ${S.pos||'-'} | Asal: ${S.asal||'-'}`,'',
+    `Nilai CIF: ${S.val} ${num(R.cif)} x kurs ${rp(S.kurs||0)}`,`Nilai pabean: ${rp(R.np)}`,`Bea masuk: ${rp(R.bm)}`,`PPN impor: ${rp(R.ppn)}`,`PPh 22 impor: ${rp(R.pph)}`,`TOTAL PUNGUTAN: ${rp(R.pung)}`,
+    `Jasa PPJK + biaya lain: ${rp(R.fee+R.lain)}`,`TOTAL TAGIHAN KE KLIEN: ${rp(R.pung+R.fee+R.lain)}`,'',
+    kurang.length?'Dokumen belum lengkap: '+kurang.join(', '):'Dokumen lengkap, siap diajukan.','','*Perkiraan, angka final mengikuti penetapan di CEISA.'].join('\n');
+  if(!$('txt').hidden)$('txt').textContent=lastText;
+  save();
+}
+const all=()=>{renderInputs();renderNota()};
+
+document.addEventListener('input',e=>{
+  const el=e.target,row=el.closest('.item');
+  if(row&&el.dataset.f){const it=S.items.find(x=>x.id===row.dataset.i);if(!it)return;const f=el.dataset.f;
+    it[f]=(f==='n'||f==='hs')?el.value:Math.max(0,+el.value||0);
+    row.querySelector('[data-fob]').value=num((+it.q||0)*(+it.h||0));renderNota();return}
+  if(['klien','aju','pos','asal'].includes(el.id)){S[el.id]=el.value;renderNota();return}
+  if(['kurs','frt','ins','ppn','fee','lain'].includes(el.id)){S[el.id]=Math.max(0,+el.value||0);renderNota()}
+});
+document.addEventListener('change',e=>{
+  const el=e.target,row=el.closest('.item');
+  if(row&&el.dataset.c){const it=S.items.find(x=>x.id===row.dataset.i);if(it){it[el.dataset.c]=el.checked;renderNota()}return}
+  if(el.dataset.doc){S.docs[el.dataset.doc]=el.checked;renderNota();return}
+  if(el.id==='formd'){S.formd=el.checked;renderNota();return}
+  if(el.id==='api'){S.api=el.value;renderNota();return}
+  if(el.id==='val'){S.val=el.value;all()}
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-del]');if(!b)return;
+  const id=b.closest('.item').dataset.i;
+  if(S.items.length<=1){toast('Minimal satu barang.');return}
+  S.items=S.items.filter(x=>x.id!==id);all();
+});
+$('btnItem').addEventListener('click',()=>{S.items.push({id:nid(),n:'',hs:'',q:1,h:0,bm:0,atiga:false,lt:false});all();const r=document.querySelectorAll('.item [data-f=n]');r[r.length-1]?.focus()});
+let konf=0;
+$('btnBaru').addEventListener('click',e=>{const b=e.currentTarget;
+  if(Date.now()-konf>3000){konf=Date.now();b.textContent='Yakin? Ketuk lagi';setTimeout(()=>b.textContent='Pengiriman baru',3000);return}
+  konf=0;b.textContent='Pengiriman baru';const k=S.kurs,f=S.fee;S=kosong();S.kurs=k;S.fee=f;all();toast('Formulir dikosongkan. Kurs dan tarif jasa tetap.')});
+$('btnContoh').addEventListener('click',()=>{S=contoh();all();toast('Contoh dimuat.')});
+$('btnCetak').addEventListener('click',()=>{const t=$('txt');t.hidden=!t.hidden;t.textContent=lastText;$('btnCetak').textContent=t.hidden?'Ringkasan teks':'Tutup ringkasan'});
+let tt;function toast(m){$('toast').textContent=m;clearTimeout(tt);tt=setTimeout(()=>$('toast').textContent='',2600)}
+$('btnSalin').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(lastText);toast('Ringkasan tersalin.')}
+  catch(e){const t=$('txt');t.hidden=false;t.textContent=lastText;$('btnCetak').textContent='Tutup ringkasan';toast('Tidak bisa menyalin otomatis. Salin teks di bawah.')}
+});
+all();
+}
+</script>
+
+</body>
+</html>
